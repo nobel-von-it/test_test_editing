@@ -44,16 +44,18 @@ impl Screen {
         self.right();
     }
     fn remove(&mut self) {
-        if self.pos == 0 && self.text.len() != 0 {
-            self.text = String::new();
-        }
-        if self.pos == 0 {
-            return;
-        }
-        if self.text.len() == self.pos {
-            self.text.remove(self.pos - 1);
-        } else {
-            self.text.remove(self.pos);
+        // if self.pos == 0 && self.text.len() != 0 {
+        //     self.text = String::new();
+        // }
+        // if self.pos == 0 {
+        //     return;
+        // }
+        if self.text.len() != 0 {
+            if self.text.len() == self.pos {
+                self.text.remove(self.pos - 1);
+            } else {
+                self.text.remove(self.pos);
+            }
         }
         self.left();
     }
@@ -61,7 +63,7 @@ impl Screen {
         let mut str = vec![];
         for (i, c) in self.text.chars().enumerate() {
             if i == self.pos {
-                str.push(format!("[{c}]"))
+                str.push(format!("{c}|"))
             } else {
                 str.push(format!("{c}"))
             }
