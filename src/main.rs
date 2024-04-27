@@ -1,4 +1,4 @@
-use std::{fmt::format, io::stdout, ops::Index};
+use std::io::stdout;
 
 use crossterm::{
     event::{self, DisableMouseCapture, EnableMouseCapture, Event, KeyCode, KeyEventKind},
@@ -7,18 +7,19 @@ use crossterm::{
 };
 use ratatui::{
     backend::{Backend, CrosstermBackend},
+    style::Stylize,
     widgets::Paragraph,
     Frame, Terminal,
 };
 
 struct Screen {
-    text: String,
+    text: Vec<char>,
     pos: usize,
 }
 impl Screen {
     fn new() -> Self {
         Self {
-            text: String::new(),
+            text: vec!['\0'],
             pos: 0,
         }
     }
@@ -36,11 +37,7 @@ impl Screen {
         }
     }
     fn insert(&mut self, c: char) {
-        if self.text.len() == 0 {
-            self.text.insert(self.pos, c);
-        } else {
-            self.text.insert(self.pos + 1, c);
-        }
+        self.text.insert(self.pos + 1, c);
         self.right();
     }
     fn remove(&mut self) {
@@ -50,7 +47,7 @@ impl Screen {
         // if self.pos == 0 {
         //     return;
         // }
-        if self.text.len() != 0 {
+        if self.text.len() > 1 && self.pos > 0 {
             if self.text.len() == self.pos {
                 self.text.remove(self.pos - 1);
             } else {
@@ -61,7 +58,7 @@ impl Screen {
     }
     fn pretty(&self) -> String {
         let mut str = vec![];
-        for (i, c) in self.text.chars().enumerate() {
+        for (i, c) in self.text.iter().enumerate() {
             if i == self.pos {
                 str.push(format!("{c}|"))
             } else {
@@ -118,7 +115,14 @@ fn run<B: Backend>(t: &mut Terminal<B>, s: &mut Screen) -> anyhow::Result<()> {
     Ok(())
 }
 fn ui(f: &mut Frame, screen: &Screen) {
-    let text = Paragraph::new(format!("pos {}. text {}", screen.pos, screen.pretty()));
+    let text = Paragraph::new(format!(
+        "pos: {} with text: {}",
+        screen.pos,
+        screen.pretty()
+    ))
+    .centered()
+    .on_dark_gray();
+    // let text = Paragraph::new(screen.pretty()).centered().on_dark_gray();
 
     f.render_widget(text, f.size())
 }
